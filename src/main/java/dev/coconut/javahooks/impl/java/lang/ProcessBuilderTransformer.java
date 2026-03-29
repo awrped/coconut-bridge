@@ -15,6 +15,10 @@ public class ProcessBuilderTransformer extends IClassTransformer {
     @Override
     public void process(ClassNode classNode) {
 
+        /* This is AI
+        * - 0x150 (very wise words)
+        */
+
         for(MethodNode mn : classNode.methods) {
             if(mn.name.equals("start")) {
                 InsnList hook = new InsnList();
@@ -25,16 +29,15 @@ public class ProcessBuilderTransformer extends IClassTransformer {
                         "(Ljava/lang/ProcessBuilder;)Ldev/coconut/javahooks/HookStatus;",
                         false));
 
-                // Compare the output with CANCEL
                 hook.add(new FieldInsnNode(Opcodes.GETSTATIC,
                         "dev/coconut/javahooks/HookStatus",
                         "CANCEL",
                         "Ldev/coconut/javahooks/HookStatus;"));
 
                 LabelNode passLabel = new LabelNode();
-                hook.add(new JumpInsnNode(Opcodes.IF_ACMPNE, passLabel)); // Jump if not equal
+                hook.add(new JumpInsnNode(Opcodes.IF_ACMPNE, passLabel)); // here we jump to pass if it's not cancel
 
-                // Throw an exception
+                // if it's cancel, we throw an exception
                 hook.add(new TypeInsnNode(Opcodes.NEW, "java/lang/RuntimeException"));
                 hook.add(new InsnNode(Opcodes.DUP));
                 hook.add(new LdcInsnNode("coconut: prevented call to ProcessBuilder.start()"));
@@ -45,7 +48,7 @@ public class ProcessBuilderTransformer extends IClassTransformer {
                         false));
                 hook.add(new InsnNode(Opcodes.ATHROW));
 
-                hook.add(passLabel); // Our pass label
+                hook.add(passLabel); // our pass label
 
                 mn.instructions.insertBefore(mn.instructions.getFirst(), hook);
             }
